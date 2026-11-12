@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>กล่องเครื่องมือ PDF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one narrow column built for the thumb. Home is a searchable index of tools
+   grouped by job; each tool is a single top-to-bottom flow: pick files, set options, run, save. */
+:root{
+  --bg:#f2f4f8; --surface:#ffffff; --sunk:#e9edf3;
+  --ink:#141d2b; --muted:#566275; --line:#d5dce6;
+  --accent:#1d4ed8; --on-accent:#ffffff;
+  --good:#0f7a4d; --bad:#b42318; --add:#dcf5e6; --del:#fde3e0;
+  --display:"Bai Jamjuree","IBM Plex Sans Thai",system-ui,sans-serif;
+  --body:"IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e131b; --surface:#18202c; --sunk:#111823;
+    --ink:#e9eef5; --muted:#9ba8ba; --line:#2a3545;
+    --accent:#8aaaff; --on-accent:#0b1220;
+    --good:#4fd39a; --bad:#ff8f84; --add:#123a29; --del:#4a1f1b;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e131b; --surface:#18202c; --sunk:#111823;
+  --ink:#e9eef5; --muted:#9ba8ba; --line:#2a3545;
+  --accent:#8aaaff; --on-accent:#0b1220;
+  --good:#4fd39a; --bad:#ff8f84; --add:#123a29; --del:#4a1f1b;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 56px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);line-height:1.25;margin:0;text-wrap:balance}
+h1{font-size:1.55rem}
+h2{font-size:1.05rem}
+h3{font-size:.95rem}
+p{margin:0}
+[hidden]{display:none!important}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+.brand{display:flex;flex-direction:column;gap:4px}
+.brand .lock{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.9rem}
+.brand svg{flex:none}
+
+/* home */
+.search{width:100%}
+#cats{display:flex;flex-direction:column;gap:22px}.cat{display:flex;flex-direction:column;gap:8px}
+.cat h2{display:flex;align-items:baseline;gap:8px}
+.cat h2 small{font-family:var(--body);font-weight:400;font-size:.8rem;color:var(--muted)}
+.tools{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (min-width:640px){.tools{grid-template-columns:repeat(3,1fr)}}
+.tool{width:100%;height:100%;display:flex;flex-direction:column;gap:8px;align-items:flex-start;text-align:left;background:var(--surface);color:inherit;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;cursor:pointer}
+.tool:active{background:var(--sunk)}
+.tool .ic{flex:none;width:38px;height:38px;border-radius:9px;display:grid;place-items:center;color:var(--tint);background:color-mix(in srgb,var(--tint) 15%,var(--surface))}
+.tool b{display:block;font-family:var(--display);font-size:.95rem;line-height:1.3}
+.tool .d{display:block;color:var(--muted);font-size:.8rem;line-height:1.4}
+.tool .tag{font-size:.7rem;font-weight:600;color:var(--accent);border:1px solid currentColor;border-radius:999px;padding:0 7px;margin-left:6px;white-space:nowrap}
+
+/* tool view */
+.back{align-self:flex-start;background:none;border:0;color:var(--accent);font:inherit;font-weight:500;padding:8px 0;cursor:pointer}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.drop{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;border:2px dashed var(--line);border-radius:12px;padding:20px 14px;background:var(--sunk);cursor:pointer}
+.drop.over{border-color:var(--accent)}
+.drop input{position:absolute;width:1px;height:1px;opacity:0}
+.drop:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.pick{display:inline-block;background:var(--accent);color:var(--on-accent);border-radius:10px;padding:10px 18px;font-weight:600}
+.files{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.files:empty{display:none}
+.files li{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:8px 8px 8px 12px}
+.files .n{flex:1;min-width:0}
+.files .n b{display:block;font-weight:500;overflow-wrap:anywhere;line-height:1.35}
+.files .n span{color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
+.ib{flex:none;width:40px;height:40px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:1rem;cursor:pointer;display:grid;place-items:center}
+.ib:disabled{opacity:.35;cursor:default}
+.ib.del{color:var(--bad)}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label,.field .lab{font-weight:500;font-size:.92rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.row{grid-template-columns:1fr}}
+.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+input[type=text],input[type=number],input[type=password],input[type=search],select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 12px;min-height:46px}
+textarea{min-height:110px;resize:vertical}
+.check{display:flex;gap:10px;align-items:center;min-height:40px}
+.check input{width:20px;height:20px;flex:none}
+.hint{color:var(--muted);font-size:.85rem}
+.run{width:100%;font:inherit;font-family:var(--display);font-weight:700;font-size:1.05rem;border:0;border-radius:12px;padding:14px;background:var(--accent);color:var(--on-accent);cursor:pointer;min-height:52px}
+.run:disabled{background:var(--line);color:var(--muted);cursor:default}
+.run.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line);font-family:var(--body);font-weight:500;font-size:1rem}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.status{min-height:1.6em;font-size:.92rem;color:var(--muted)}
+.status.err{color:var(--bad);font-weight:500}
+.bar{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+.result{border-color:var(--good)}
+.result .fn{font-weight:600;overflow-wrap:anywhere}
+.result .ok{color:var(--good);font-weight:600;display:flex;gap:8px;align-items:center}
+.save{background:var(--good);color:var(--surface)}
+.out{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--sunk);border-radius:10px;padding:12px;max-height:60vh;overflow:auto;font-size:.95rem}
+.out .a{background:var(--add);display:block}
+.out .r{background:var(--del);display:block;text-decoration:line-through}
+.out .h{display:block;font-weight:600;margin-top:8px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+.btnrow>*{flex:1 1 140px}
+
+/* organize */
+.orgbar{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:.9rem;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;min-height:40px}
+.chip.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.th{border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.th.gone{opacity:.45;border-style:dashed}
+.th .pv{aspect-ratio:1;display:grid;place-items:center;background:var(--sunk);border-radius:6px;overflow:hidden}
+.th .pv img{max-width:76%;max-height:76%;box-shadow:0 1px 4px rgba(0,0,0,.25);background:#fff}
+.th .pv .blank{width:54%;height:76%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.th .lb{font-size:.8rem;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.th .bt{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.th .bt .ib{width:auto;height:36px}
+
+/* editor */
+.ed{display:flex;flex-direction:column;gap:10px}
+.edtools{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.edtools .chip{flex:none;display:flex;align-items:center;gap:6px;padding:8px 12px}
+.edrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0;flex:none}
+.sw.on{outline:3px solid var(--accent);outline-offset:2px}
+.edstage{position:relative;overflow:auto;background:var(--sunk);border:1px solid var(--line);border-radius:10px;max-height:78vh;padding:8px}
+.edpage{position:relative;margin:0 auto;box-shadow:0 1px 6px rgba(0,0,0,.3);background:#fff;line-height:0}
+.edpage canvas{display:block;width:100%;height:auto}
+.edpage canvas.ov{position:absolute;left:0;top:0;height:100%}
+.ednav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ednav span{font-variant-numeric:tabular-nums;white-space:nowrap;flex:1;text-align:center;font-size:.9rem}.ednav .chip{white-space:nowrap;padding:8px 10px}.ednav{gap:6px}
+.selbar{border:1px solid var(--accent);border-radius:10px;padding:8px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:end center;z-index:20;padding:12px}
+.modal .panel{width:100%;max-width:520px;max-height:92vh;overflow:auto}
+.pad{width:100%;height:190px;border:2px dashed var(--line);border-radius:10px;background:#fff;touch-action:none;display:block}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><p class="muted">กำลังโหลดเครื่องมือ</p></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="core.js"></script>
+<script src="tools.js"></script>
+<script src="convert.js"></script>
+<script src="editor.js"></script>
+<script>PK.start();</script>
+</body>
+</html>
